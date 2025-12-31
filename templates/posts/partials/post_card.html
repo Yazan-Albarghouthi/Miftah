@@ -1,4 +1,4 @@
-<div class="card study-card">
+<div class="card study-card position-relative">
     <div class="card-body">
         <!-- Tags -->
         <div class="mb-2">
@@ -11,13 +11,13 @@
 
         <!-- Title -->
         <h5 class="card-title mb-2">
-            <a href="{% url 'posts:detail' post.pk %}" class="text-decoration-none text-dark">
+            <a href="{% url 'posts:detail' post.pk %}" class="text-decoration-none text-dark stretched-link">
                 {{ post.title }}
             </a>
         </h5>
 
         <!-- Author & Date -->
-        <div class="d-flex align-items-center gap-2 mb-2 text-muted small">
+        <div class="d-flex align-items-center gap-2 mb-2 text-muted small position-relative" style="z-index: 2;">
             <a href="{% url 'accounts:profile' post.author.username %}" class="text-decoration-none">
                 <i class="bi bi-person-circle me-1"></i>
                 {{ post.author.username }}
