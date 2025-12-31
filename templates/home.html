@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}الرئيسية - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Search Bar -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <form action="{% url 'posts:search' %}" method="get" class="d-flex gap-2">
+                <input type="text" name="q" class="form-control form-control-lg"
+                       placeholder="ابحث في المنشورات...">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Options -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="text-center mb-4">أنشئ مجموعة دراسية جديدة</h2>
+            <div class="row g-4">
+                <!-- Flashcards Option -->
+                <div class="col-md-6">
+                    <a href="{% url 'study:generate' 'flashcards' %}" class="text-decoration-none">
+                        <div class="card study-card h-100">
+                            <div class="card-body p-5 text-center">
+                                <div class="option-icon mb-4">
+                                    <i class="bi bi-stack display-1 text-primary"></i>
+                                </div>
+                                <h3 class="card-title mb-3">بطاقات تعليمية</h3>
+                                <p class="card-text text-muted">
+                                    أنشئ بطاقات تعليمية تفاعلية
+                                    <br>
+                                    مثالية للحفظ والمراجعة
+                                </p>
+                                <div class="mt-4">
+                                    <span class="btn btn-primary btn-lg">
+                                        <i class="bi bi-plus-lg me-2"></i>
+                                        إنشاء بطاقات
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Quiz Option -->
+                <div class="col-md-6">
+                    <a href="{% url 'study:generate' 'quiz' %}" class="text-decoration-none">
+                        <div class="card study-card h-100">
+                            <div class="card-body p-5 text-center">
+                                <div class="option-icon mb-4">
+                                    <i class="bi bi-question-circle display-1 text-primary"></i>
+                                </div>
+                                <h3 class="card-title mb-3">اختبار</h3>
+                                <p class="card-text text-muted">
+                                    أنشئ اختبار اختيار من متعدد
+                                    <br>
+                                    مع شرح لكل إجابة
+                                </p>
+                                <div class="mt-4">
+                                    <span class="btn btn-primary btn-lg">
+                                        <i class="bi bi-plus-lg me-2"></i>
+                                        إنشاء اختبار
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{% url 'study:history' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-clock-history me-2"></i>
+                    عرض السجل
+                </a>
+                <a href="{% url 'feed:recent' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-globe me-2"></i>
+                    استكشف المنشورات
+                </a>
+                <a href="{% url 'feed:following' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-people me-2"></i>
+                    منشورات المتابَعين
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .option-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}

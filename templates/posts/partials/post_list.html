@@ -1,0 +1,14 @@
+{% if posts %}
+<div class="row g-3">
+    {% for post in posts %}
+    <div class="col-12">
+        {% include 'posts/partials/post_card.html' %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="bi bi-file-earmark-text"></i>
+    <p>لا توجد منشورات</p>
+</div>
+{% endif %}

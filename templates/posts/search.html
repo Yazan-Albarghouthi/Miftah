@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}البحث - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h4 class="mb-4">
+                <i class="bi bi-search me-2"></i>
+                نتائج البحث
+            </h4>
+
+            <!-- Search Form -->
+            <form action="" method="get" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control form-control-lg"
+                           value="{{ query }}" placeholder="ابحث بالكلمات أو الوسوم...">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+
+                {% if all_tags %}
+                <div class="mt-3">
+                    <small class="text-muted d-block mb-2">تصفية بالوسوم:</small>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for tag in all_tags %}
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" name="tags"
+                                   value="{{ tag.name }}" id="tag-{{ tag.pk }}"
+                                   {% if tag.name in tag_filter %}checked{% endif %}>
+                            <label class="form-check-label" for="tag-{{ tag.pk }}">
+                                <span class="tag-badge" style="background-color: {{ tag.color }}; font-size: 0.8rem;">
+                                    {{ tag.name }}
+                                </span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary btn-sm mt-2">
+                        تطبيق التصفية
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+
+            <!-- Results -->
+            {% if query or tag_filter %}
+            <p class="text-muted mb-3">
+                عدد النتائج: {{ posts|length }}
+                {% if query %}
+                للبحث عن "{{ query }}"
+                {% endif %}
+            </p>
+            {% endif %}
+
+            {% include 'posts/partials/post_list.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}

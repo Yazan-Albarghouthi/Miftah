@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ study_set.title|default:'اختبار' }} - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1">
+                        <i class="bi bi-question-circle me-2 text-primary"></i>
+                        {{ study_set.title|default:'اختبار' }}
+                    </h4>
+                    <div class="text-muted">
+                        {{ questions|length }} سؤال
+                        •
+                        {% if study_set.language == 'ar' %}العربية{% else %}English{% endif %}
+                    </div>
+                </div>
+                {% if is_owner %}
+                <div class="d-flex gap-2">
+                    <a href="{% url 'posts:create' %}?study_set={{ study_set.pk }}" class="btn btn-primary">
+                        <i class="bi bi-share me-1"></i>
+                        مشاركة
+                    </a>
+                    <a href="{% url 'study:delete' study_set.pk %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Score Display -->
+            <div class="card mb-4 d-none" id="score-card">
+                <div class="card-body text-center py-4">
+                    <h3 class="mb-2">النتيجة النهائية</h3>
+                    <div class="display-4 text-primary" id="score-display">0/{{ questions|length }}</div>
+                    <button class="btn btn-primary mt-3" onclick="resetQuiz()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>
+                        إعادة الاختبار
+                    </button>
+                </div>
+            </div>
+
+            <!-- Questions -->
+            <div id="questions-container">
+                {% for q in questions %}
+                <div class="card mb-4 question-card" data-question="{{ forloop.counter0 }}" data-correct="{{ q.correct_index }}">
+                    <div class="card-header">
+                        <span class="badge bg-primary me-2">{{ forloop.counter }}</span>
+                        {{ q.question }}
+                    </div>
+                    <div class="card-body">
+                        <div class="options-container">
+                            {% for option in q.options %}
+                            <div class="quiz-option" data-option="{{ forloop.counter0 }}"
+                                 onclick="selectOption(this, {{ forloop.parentloop.counter0 }}, {{ forloop.counter0 }})">
+                                <span class="option-letter me-2">
+                                    {% if forloop.counter == 1 %}أ{% elif forloop.counter == 2 %}ب{% elif forloop.counter == 3 %}ج{% else %}د{% endif %})
+                                </span>
+                                {{ option }}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Explanation (hidden initially) -->
+                        <div class="explanation mt-3 d-none">
+                            <div class="alert alert-info mb-0">
+                                <strong><i class="bi bi-lightbulb me-1"></i> الشرح:</strong>
+                                <p class="mb-0 mt-2" style="white-space: pre-line;">{{ q.explanation }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mb-4" id="submit-section">
+                <button class="btn btn-primary btn-lg" onclick="showResults()">
+                    <i class="bi bi-check-circle me-2"></i>
+                    عرض النتائج
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    const answers = {};
+    const totalQuestions = {{ questions|length }};
+
+    function selectOption(element, questionIndex, optionIndex) {
+        // If already answered, don't allow change
+        const questionCard = element.closest('.question-card');
+        if (questionCard.classList.contains('answered')) return;
+
+        // Remove previous selection
+        const options = element.parentElement.querySelectorAll('.quiz-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+
+        // Add selection
+        element.classList.add('selected');
+        answers[questionIndex] = optionIndex;
+    }
+
+    function showResults() {
+        let score = 0;
+
+        document.querySelectorAll('.question-card').forEach((card, index) => {
+            const correctIndex = parseInt(card.dataset.correct);
+            const selectedIndex = answers[index];
+            const options = card.querySelectorAll('.quiz-option');
+
+            card.classList.add('answered');
+
+            // Show correct/incorrect
+            options.forEach((opt, optIndex) => {
+                if (optIndex === correctIndex) {
+                    opt.classList.add('correct');
+                } else if (optIndex === selectedIndex && selectedIndex !== correctIndex) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            // Count score
+            if (selectedIndex === correctIndex) {
+                score++;
+            }
+
+            // Show explanation
+            card.querySelector('.explanation').classList.remove('d-none');
+        });
+
+        // Show score
+        document.getElementById('score-display').textContent = `${score}/${totalQuestions}`;
+        document.getElementById('score-card').classList.remove('d-none');
+        document.getElementById('submit-section').classList.add('d-none');
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+        // Reset all
+        Object.keys(answers).forEach(key => delete answers[key]);
+
+        document.querySelectorAll('.question-card').forEach(card => {
+            card.classList.remove('answered');
+
+            card.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            card.querySelector('.explanation').classList.add('d-none');
+        });
+
+        document.getElementById('score-card').classList.add('d-none');
+        document.getElementById('submit-section').classList.remove('d-none');
+    }
+</script>
+{% endblock %}
+{% endblock %}

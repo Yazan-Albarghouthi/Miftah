@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}السجل - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">
+                    <i class="bi bi-clock-history me-2"></i>
+                    سجل المجموعات الدراسية
+                </h4>
+
+                <!-- Filter -->
+                <div class="btn-group">
+                    <a href="{% url 'study:history' %}"
+                       class="btn btn-outline-secondary {% if not current_type %}active{% endif %}">
+                        الكل
+                    </a>
+                    <a href="{% url 'study:history' %}?type=flashcards"
+                       class="btn btn-outline-secondary {% if current_type == 'flashcards' %}active{% endif %}">
+                        <i class="bi bi-stack me-1"></i>
+                        بطاقات
+                    </a>
+                    <a href="{% url 'study:history' %}?type=quiz"
+                       class="btn btn-outline-secondary {% if current_type == 'quiz' %}active{% endif %}">
+                        <i class="bi bi-question-circle me-1"></i>
+                        اختبارات
+                    </a>
+                </div>
+            </div>
+
+            {% if study_sets %}
+            <div class="row g-3">
+                {% for study_set in study_sets %}
+                <div class="col-md-6">
+                    <div class="card study-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    {% if study_set.set_type == 'flashcards' %}
+                                    <span class="badge bg-primary">
+                                        <i class="bi bi-stack me-1"></i>
+                                        بطاقات
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-question-circle me-1"></i>
+                                        اختبار
+                                    </span>
+                                    {% endif %}
+                                    <span class="badge bg-secondary">
+                                        {% if study_set.language == 'ar' %}العربية{% else %}English{% endif %}
+                                    </span>
+                                    {% if study_set.is_shared %}
+                                    <span class="badge bg-info">
+                                        <i class="bi bi-share"></i>
+                                        مُشارك
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">{{ study_set.created_at|date:"Y/m/d" }}</small>
+                            </div>
+
+                            <h6 class="card-title">
+                                {{ study_set.title|default:'بدون عنوان' }}
+                            </h6>
+
+                            <p class="text-muted small mb-3">
+                                {{ study_set.item_count }}
+                                {% if study_set.set_type == 'flashcards' %}بطاقة{% else %}سؤال{% endif %}
+                            </p>
+
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'study:detail' study_set.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>
+                                    عرض
+                                </a>
+                                <a href="{% url 'posts:create' %}?study_set={{ study_set.pk }}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-share me-1"></i>
+                                    مشاركة
+                                </a>
+                                <a href="{% url 'study:delete' study_set.pk %}"
+                                   class="btn btn-outline-danger btn-sm me-auto">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-folder2-open"></i>
+                <p>لا توجد مجموعات دراسية حتى الآن</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'study:generate' 'flashcards' %}" class="btn btn-primary">
+                        <i class="bi bi-stack me-1"></i>
+                        إنشاء بطاقات
+                    </a>
+                    <a href="{% url 'study:generate' 'quiz' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-question-circle me-1"></i>
+                        إنشاء اختبار
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}مفتاح - منصة تعليمية للطلاب العرب{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <h1 class="display-3 fw-bold mb-4">
+                        <i class="bi bi-key-fill text-primary"></i>
+                        مفتاح
+                    </h1>
+                    <p class="lead mb-4">
+                        منصة تعليمية ذكية تساعدك على تحويل أي نص أو ملف PDF
+                        <br>
+                        إلى بطاقات تعليمية واختبارات تفاعلية باستخدام الذكاء الاصطناعي
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg px-5">
+                            ابدأ الآن
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg px-5">
+                            تسجيل الدخول
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5 bg-white">
+        <div class="container">
+            <h2 class="text-center mb-5">كيف يعمل مفتاح؟</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-file-text display-4 text-primary"></i>
+                            </div>
+                            <h5 class="card-title">أدخل النص</h5>
+                            <p class="card-text text-muted">
+                                الصق أي نص دراسي أو ارفع ملف PDF
+                                <br>
+                                يدعم اللغتين العربية والإنجليزية
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-robot display-4 text-primary"></i>
+                            </div>
+                            <h5 class="card-title">الذكاء الاصطناعي</h5>
+                            <p class="card-text text-muted">
+                                يقوم الذكاء الاصطناعي بتحليل النص
+                                <br>
+                                وإنشاء محتوى تعليمي مخصص
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center p-4">
+                        <div class="card-body">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-mortarboard display-4 text-primary"></i>
+                            </div>
+                            <h5 class="card-title">تعلم بفعالية</h5>
+                            <p class="card-text text-muted">
+                                استخدم البطاقات التعليمية والاختبارات
+                                <br>
+                                للمراجعة والتحضير للامتحانات
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Study Types Section -->
+    <section class="study-types-section py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 study-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-stack display-5 text-primary me-3"></i>
+                                <h4 class="mb-0">بطاقات تعليمية</h4>
+                            </div>
+                            <p class="text-muted">
+                                بطاقات تفاعلية بتأثير القلب
+                                <br>
+                                مثالية للحفظ والمراجعة السريعة
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> سؤال وجواب</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> تأثير قلب البطاقة</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> سهلة المشاركة</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 study-card">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-question-circle display-5 text-primary me-3"></i>
+                                <h4 class="mb-0">اختبارات</h4>
+                            </div>
+                            <p class="text-muted">
+                                اختبارات اختيار من متعدد
+                                <br>
+                                مع شرح لكل إجابة
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i> 4 خيارات لكل سؤال</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> شرح مفصل للإجابات</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i> تقييم فوري</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h2 class="mb-4">ابدأ رحلتك التعليمية الآن</h2>
+            <p class="lead mb-4">انضم إلى مجتمع الطلاب وشارك موادك التعليمية</p>
+            <a href="{% url 'accounts:signup' %}" class="btn btn-light btn-lg px-5">
+                إنشاء حساب مجاني
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 border-top">
+        <div class="container text-center text-muted">
+            <p class="mb-0">مفتاح - منصة تعليمية للطلاب العرب</p>
+        </div>
+    </footer>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        padding: 100px 0;
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f9ff;
+        border-radius: 50%;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف المجموعة - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-exclamation-triangle display-1 text-warning mb-3"></i>
+                    <h4>هل أنت متأكد من حذف هذه المجموعة؟</h4>
+                    <p class="text-muted">
+                        {{ study_set.title|default:'بدون عنوان' }}
+                        <br>
+                        ({{ study_set.item_count }}
+                        {% if study_set.set_type == 'flashcards' %}بطاقة{% else %}سؤال{% endif %})
+                    </p>
+                    <p class="text-danger small">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        لا يمكن التراجع عن هذا الإجراء
+                    </p>
+
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>
+                            نعم، احذف
+                        </button>
+                    </form>
+                    <a href="{% url 'study:detail' study_set.pk %}" class="btn btn-outline-secondary">
+                        إلغاء
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}نشر جديد - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        نشر جديد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if not study_sets %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        لا توجد لديك مجموعات دراسية. يجب إنشاء مجموعة أولاً.
+                        <div class="mt-2">
+                            <a href="{% url 'study:generate' 'flashcards' %}" class="btn btn-primary btn-sm">
+                                إنشاء بطاقات
+                            </a>
+                            <a href="{% url 'study:generate' 'quiz' %}" class="btn btn-outline-primary btn-sm">
+                                إنشاء اختبار
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Study Set Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-collection me-1"></i>
+                                المجموعة الدراسية (مطلوب)
+                            </label>
+                            <select name="study_set" class="form-select" required>
+                                <option value="">اختر مجموعة...</option>
+                                {% for ss in study_sets %}
+                                <option value="{{ ss.pk }}"
+                                        {% if preselected_study_set.pk == ss.pk %}selected{% endif %}>
+                                    {% if ss.set_type == 'flashcards' %}📚{% else %}❓{% endif %}
+                                    {{ ss.title|default:'بدون عنوان' }}
+                                    ({{ ss.item_count }} {% if ss.set_type == 'flashcards' %}بطاقة{% else %}سؤال{% endif %})
+                                    - {{ ss.created_at|date:"Y/m/d" }}
+                                    {% if ss.is_shared %}(مُشارك سابقاً){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.title.label }} (مطلوب)</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.tags_input.label }} (مطلوب)</label>
+                            {{ form.tags_input }}
+                            <div class="form-text">{{ form.tags_input.help_text }}</div>
+                            {% if form.tags_input.errors %}
+                            <div class="text-danger small">{{ form.tags_input.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Caption -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.caption.label }}</label>
+                            {{ form.caption }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i>
+                            نشر
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
