@@ -2,7 +2,6 @@
 Models for posts, tags, reactions, and comments.
 """
 
-import hashlib
 from django.db import models
 from django.contrib.auth.models import User
 from study.models import StudySet
@@ -11,36 +10,18 @@ from study.models import StudySet
 class Tag(models.Model):
     """
     Tag for categorizing posts.
-    Color is deterministically derived from tag name.
+    Predefined tags with specific colors.
     """
-    name = models.CharField(max_length=50, unique=True, verbose_name='اسم الوسم')
+    name = models.CharField(max_length=50, unique=True, verbose_name='اسم التصنيف')
+    color = models.CharField(max_length=7, default='#94a3b8', verbose_name='اللون')
 
     class Meta:
-        verbose_name = 'وسم'
-        verbose_name_plural = 'الوسوم'
+        verbose_name = 'تصنيف'
+        verbose_name_plural = 'التصنيفات'
+        ordering = ['name']
 
     def __str__(self):
         return self.name
-
-    @property
-    def color(self):
-        """Generate a consistent color based on tag name."""
-        # List of nice colors for tags
-        colors = [
-            '#3B82F6',  # Blue
-            '#10B981',  # Green
-            '#F59E0B',  # Amber
-            '#EF4444',  # Red
-            '#8B5CF6',  # Purple
-            '#EC4899',  # Pink
-            '#06B6D4',  # Cyan
-            '#F97316',  # Orange
-            '#6366F1',  # Indigo
-            '#14B8A6',  # Teal
-        ]
-        # Use hash to get consistent index
-        hash_val = int(hashlib.md5(self.name.encode()).hexdigest(), 16)
-        return colors[hash_val % len(colors)]
 
 
 class Post(models.Model):

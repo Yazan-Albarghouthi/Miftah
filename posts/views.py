@@ -27,6 +27,9 @@ def create_post(request):
             StudySet, pk=study_set_id, owner=request.user
         )
 
+    # Get all tags for the selector
+    all_tags = Tag.objects.all().order_by('name')
+
     if request.method == 'POST':
         form = PostForm(request.POST)
         study_set_id = request.POST.get('study_set')
@@ -37,6 +40,7 @@ def create_post(request):
                 'form': form,
                 'study_sets': StudySet.objects.filter(owner=request.user),
                 'preselected_study_set': preselected_study_set,
+                'all_tags': all_tags,
             })
 
         study_set = get_object_or_404(StudySet, pk=study_set_id, owner=request.user)
@@ -55,6 +59,7 @@ def create_post(request):
         'form': form,
         'study_sets': study_sets,
         'preselected_study_set': preselected_study_set,
+        'all_tags': all_tags,
     })
 
 

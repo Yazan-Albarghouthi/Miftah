@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'accounts',
     'study',
     'posts',
+    'admin_panel',
 ]
 
 MIDDLEWARE = [

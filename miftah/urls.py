@@ -17,6 +17,7 @@ urlpatterns = [
     path('study/', include('study.urls')),
     path('posts/', include('posts.urls')),
     path('feed/', include('posts.feed_urls')),
+    path('admin-panel/', include('admin_panel.urls')),
 ]
 
 if settings.DEBUG:

@@ -9,12 +9,12 @@ from .models import Post, Tag, Comment
 class PostForm(forms.ModelForm):
     """Form for creating a new post."""
 
-    tags_input = forms.CharField(
-        label='الوسوم',
-        help_text='أدخل الوسوم مفصولة بفواصل (مطلوب وسم واحد على الأقل)',
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'مثال: فيزياء، كيمياء، أحياء'
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all().order_by('name'),
+        label='التصنيفات',
+        help_text='اختر من 1 إلى 4 تصنيفات',
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'tag-checkbox-list'
         })
     )
 
@@ -37,23 +37,16 @@ class PostForm(forms.ModelForm):
             }),
         }
 
-    def clean_tags_input(self):
-        tags_input = self.cleaned_data.get('tags_input', '')
-        # Split by comma and clean
-        tag_names = [t.strip() for t in tags_input.split(',') if t.strip()]
+    def clean_tags(self):
+        tags = self.cleaned_data.get('tags', [])
 
-        if not tag_names:
-            raise forms.ValidationError('يرجى إدخال وسم واحد على الأقل.')
+        if len(tags) < 1:
+            raise forms.ValidationError('يرجى اختيار تصنيف واحد على الأقل.')
 
-        if len(tag_names) > 10:
-            raise forms.ValidationError('الحد الأقصى 10 وسوم.')
+        if len(tags) > 4:
+            raise forms.ValidationError('الحد الأقصى 4 تصنيفات.')
 
-        # Validate each tag
-        for name in tag_names:
-            if len(name) > 50:
-                raise forms.ValidationError(f'الوسم "{name}" طويل جداً (الحد الأقصى 50 حرف).')
-
-        return tag_names
+        return tags
 
     def save(self, commit=True, author=None, study_set=None):
         post = super().save(commit=False)
@@ -66,11 +59,9 @@ class PostForm(forms.ModelForm):
         if commit:
             post.save()
 
-            # Create tags
-            tag_names = self.cleaned_data.get('tags_input', [])
-            for name in tag_names:
-                tag, _ = Tag.objects.get_or_create(name=name)
-                post.tags.add(tag)
+            # Add selected tags
+            tags = self.cleaned_data.get('tags', [])
+            post.tags.set(tags)
 
         return post
 

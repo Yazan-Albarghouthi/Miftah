@@ -82,6 +82,23 @@
             margin: 2px;
         }
 
+        /* Compact tag chips for search page */
+        .search-tag-chip {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .search-tag-chip:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
+        }
+
         .study-card {
             transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -269,6 +286,13 @@
                                     <i class="bi bi-people"></i> المتابَعون
                                 </a>
                             </li>
+                            {% if user.is_staff %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'admin_panel:dashboard' %}">
+                                    <i class="bi bi-shield-check"></i> لوحة الإدارة
+                                </a>
+                            </li>
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}">

@@ -69,13 +69,47 @@
                             {% endif %}
                         </div>
 
-                        <!-- Tags -->
+                        <!-- Tags Selection -->
                         <div class="mb-3">
-                            <label class="form-label">{{ form.tags_input.label }} (مطلوب)</label>
-                            {{ form.tags_input }}
-                            <div class="form-text">{{ form.tags_input.help_text }}</div>
-                            {% if form.tags_input.errors %}
-                            <div class="text-danger small">{{ form.tags_input.errors.0 }}</div>
+                            <label class="form-label">
+                                <i class="bi bi-tags me-1"></i>
+                                التصنيفات (مطلوب)
+                            </label>
+                            <div class="form-text mb-2">اختر من 1 إلى 4 تصنيفات</div>
+
+                            <!-- Selected Tags Display -->
+                            <div id="selected-tags" class="d-flex flex-wrap gap-2 mb-2">
+                                <!-- Selected tags will appear here -->
+                            </div>
+
+                            <!-- Search Input -->
+                            <input type="text" id="tag-search" class="form-control mb-2"
+                                   placeholder="ابحث عن تصنيف...">
+
+                            <!-- Tags Grid -->
+                            <div id="tags-container" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% for tag in all_tags %}
+                                <div class="tag-item d-inline-block m-1"
+                                     data-tag-name="{{ tag.name|lower }}"
+                                     data-tag-color="{{ tag.color }}">
+                                    <input type="checkbox"
+                                           name="tags"
+                                           value="{{ tag.pk }}"
+                                           id="tag-{{ tag.pk }}"
+                                           class="d-none tag-checkbox">
+                                    <label for="tag-{{ tag.pk }}"
+                                           class="tag-chip badge rounded-pill px-3 py-2"
+                                           style="cursor: pointer; font-size: 0.9rem; background-color: #e9ecef; color: #495057;">
+                                        {{ tag.name }}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted mb-0">لا توجد تصنيفات. قم بتشغيل: python manage.py seed_tags</p>
+                                {% endfor %}
+                            </div>
+
+                            {% if form.tags.errors %}
+                            <div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>
                             {% endif %}
                         </div>
 
@@ -96,4 +130,110 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tag-search');
+    const tagsContainer = document.getElementById('tags-container');
+    const selectedTagsContainer = document.getElementById('selected-tags');
+    const maxTags = 4;
+
+    if (!searchInput || !tagsContainer) return;
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        const tagItems = tagsContainer.querySelectorAll('.tag-item');
+
+        tagItems.forEach(item => {
+            const tagName = item.dataset.tagName;
+            if (tagName.includes(query)) {
+                item.style.display = 'inline-block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Get color from tag item's data attribute
+    function getTagColor(checkbox) {
+        const tagItem = checkbox.closest('.tag-item');
+        return tagItem ? tagItem.dataset.tagColor : '#94a3b8';
+    }
+
+    // Handle tag selection
+    function updateTagStyles() {
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        let selectedCount = 0;
+
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            const color = getTagColor(cb);
+
+            if (cb.checked) {
+                selectedCount++;
+                label.style.backgroundColor = color;
+                label.style.color = '#ffffff';
+            } else {
+                label.style.backgroundColor = '#e9ecef';
+                label.style.color = '#495057';
+            }
+        });
+
+        // Disable unchecked tags if max reached
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            if (!cb.checked && selectedCount >= maxTags) {
+                label.style.opacity = '0.5';
+                label.style.pointerEvents = 'none';
+            } else {
+                label.style.opacity = '1';
+                label.style.pointerEvents = 'auto';
+            }
+        });
+
+        updateSelectedTagsDisplay();
+    }
+
+    // Display selected tags at the top
+    function updateSelectedTagsDisplay() {
+        selectedTagsContainer.innerHTML = '';
+        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
+
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            const tagName = label.textContent.trim();
+            const color = getTagColor(cb);
+
+            const chip = document.createElement('span');
+            chip.className = 'badge rounded-pill px-3 py-2 d-flex align-items-center gap-1';
+            chip.style.backgroundColor = color;
+            chip.style.color = '#ffffff';
+            chip.style.fontSize = '0.9rem';
+            chip.innerHTML = `
+                ${tagName}
+                <i class="bi bi-x-circle" style="cursor: pointer;" data-tag-id="${cb.id}"></i>
+            `;
+
+            // Remove tag on X click
+            chip.querySelector('i').addEventListener('click', function() {
+                document.getElementById(this.dataset.tagId).checked = false;
+                updateTagStyles();
+            });
+
+            selectedTagsContainer.appendChild(chip);
+        });
+    }
+
+    // Listen for checkbox changes
+    document.querySelectorAll('.tag-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateTagStyles);
+    });
+
+    // Initialize on page load
+    updateTagStyles();
+});
+</script>
 {% endblock %}

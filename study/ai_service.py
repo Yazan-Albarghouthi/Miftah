@@ -292,12 +292,22 @@ def extract_text_from_pdf(pdf_file):
         if not full_text:
             return {
                 'success': False,
-                'error': 'لا يمكن استخراج نص من هذا الملف. تأكد أن الملف يحتوي على نص قابل للنسخ وليس صور فقط.'
+                'error': 'لا يمكن استخراج نص من هذا الملف. يبدو أنه ملف PDF ممسوح ضوئياً (صور). يرجى استخدام ملف PDF يحتوي على نص قابل للنسخ.',
+                'is_ocr': True
+            }
+
+        # Check if extracted text is too short (might be partial OCR or corrupted)
+        if len(full_text) < 50:
+            return {
+                'success': False,
+                'error': 'النص المستخرج قصير جداً (أقل من 50 حرف). قد يكون الملف ممسوحاً ضوئياً أو تالفاً. يرجى استخدام ملف PDF آخر.',
+                'is_ocr': True
             }
 
         return {
             'success': True,
-            'text': full_text
+            'text': full_text,
+            'char_count': len(full_text)
         }
 
     except Exception as e:

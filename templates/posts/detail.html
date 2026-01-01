@@ -71,9 +71,10 @@
                         {% include 'posts/partials/reaction_buttons.html' %}
                     </div>
 
-                    <!-- Delete Button (owner only) -->
-                    {% if is_owner %}
-                    <div class="mt-3 pt-3 border-top">
+                    <!-- Actions -->
+                    <div class="mt-3 pt-3 border-top d-flex gap-2">
+                        {% if is_owner %}
+                        <!-- Delete Button (owner only) -->
                         <form method="post" action="{% url 'posts:delete' post.pk %}"
                               onsubmit="return confirm('هل أنت متأكد من حذف هذا المنشور؟')">
                             {% csrf_token %}
@@ -82,8 +83,15 @@
                                 حذف المنشور
                             </button>
                         </form>
+                        {% else %}
+                        <!-- Report Button (not owner) -->
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#reportModal">
+                            <i class="bi bi-flag me-1"></i>
+                            إبلاغ
+                        </button>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
 
@@ -124,15 +132,25 @@
                                             {{ comment.created_at|date:"Y/m/d - H:i" }}
                                         </span>
                                     </div>
-                                    {% if comment.author == request.user %}
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            hx-post="{% url 'posts:delete_comment' comment.pk %}"
-                                            hx-target="#comment-{{ comment.pk }}"
-                                            hx-swap="outerHTML"
-                                            hx-confirm="هل أنت متأكد من حذف هذا التعليق؟">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                    {% endif %}
+                                    <div class="d-flex gap-1">
+                                        {% if comment.author != request.user %}
+                                        <!-- Report Comment Button -->
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#reportModal-{{ comment.pk }}">
+                                            <i class="bi bi-flag"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if comment.author == request.user %}
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                hx-post="{% url 'posts:delete_comment' comment.pk %}"
+                                                hx-target="#comment-{{ comment.pk }}"
+                                                hx-swap="outerHTML"
+                                                hx-confirm="هل أنت متأكد من حذف هذا التعليق؟">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <p class="mb-0 mt-1">{{ comment.body }}</p>
                             </div>
@@ -150,4 +168,16 @@
         </div>
     </div>
 </div>
+
+<!-- Report Modal for Post -->
+{% if not is_owner %}
+{% include 'admin_panel/partials/report_modal.html' with content_type='post' object_id=post.pk %}
+{% endif %}
+
+<!-- Report Modals for Comments -->
+{% for comment in comments %}
+{% if comment.author != request.user %}
+{% include 'admin_panel/partials/report_modal.html' with content_type='comment' object_id=comment.pk modal_id=comment.pk %}
+{% endif %}
+{% endfor %}
 {% endblock %}
