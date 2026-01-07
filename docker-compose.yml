@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: miftah_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-miftah_db}
+      POSTGRES_USER: ${DB_USER:-miftah_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-miftah_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_HOST_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-miftah_user} -d ${DB_NAME:-miftah_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: miftah_web
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    environment:
+      - DEBUG=${DEBUG:-True}
+      - DB_NAME=${DB_NAME:-miftah_db}
+      - DB_USER=${DB_USER:-miftah_user}
+      - DB_PASSWORD=${DB_PASSWORD:-miftah_password}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_volume:

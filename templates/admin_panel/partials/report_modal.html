@@ -1,0 +1,52 @@
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal{% if modal_id %}-{{ modal_id }}{% endif %}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-flag me-2"></i>
+                    الإبلاغ عن محتوى
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form hx-post="{% url 'admin_panel:submit_report' %}"
+                  hx-target="#report-result{% if modal_id %}-{{ modal_id }}{% endif %}"
+                  hx-swap="innerHTML"
+                  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                {% csrf_token %}
+                <input type="hidden" name="content_type" value="{{ content_type }}">
+                <input type="hidden" name="object_id" value="{{ object_id }}">
+
+                <div class="modal-body">
+                    <div id="report-result{% if modal_id %}-{{ modal_id }}{% endif %}"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label">سبب البلاغ <span class="text-danger">*</span></label>
+                        <select name="reason" class="form-select" required>
+                            <option value="">اختر السبب...</option>
+                            <option value="hate_speech">خطاب كراهية</option>
+                            <option value="spam">محتوى مزعج (سبام)</option>
+                            <option value="inappropriate">محتوى غير لائق</option>
+                            <option value="misinformation">معلومات مضللة</option>
+                            <option value="harassment">تحرش أو إساءة</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">تفاصيل إضافية (اختياري)</label>
+                        <textarea name="details" class="form-control" rows="3"
+                                  placeholder="أضف أي تفاصيل تساعد في فهم البلاغ..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-flag me-1"></i>
+                        إرسال البلاغ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

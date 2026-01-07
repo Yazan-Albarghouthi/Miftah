@@ -1,0 +1,109 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}البلاغات - لوحة الإدارة{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">
+        <i class="bi bi-flag me-2"></i>
+        البلاغات
+    </h4>
+</div>
+
+<!-- Status Filter Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}"
+           href="?status=pending">
+            قيد المراجعة
+            {% if pending_reports_count %}
+            <span class="badge bg-danger ms-1">{{ pending_reports_count }}</span>
+            {% endif %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'approved' %}active{% endif %}"
+           href="?status=approved">
+            تمت الموافقة
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'dismissed' %}active{% endif %}"
+           href="?status=dismissed">
+            مرفوض
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'all' %}active{% endif %}"
+           href="?status=all">
+            الكل
+        </a>
+    </li>
+</ul>
+
+<!-- Reports Table -->
+{% if reports %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>المُبلِّغ</th>
+                        <th>نوع المحتوى</th>
+                        <th>المحتوى</th>
+                        <th>السبب</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>{{ report.pk }}</td>
+                        <td>
+                            <a href="{% url 'accounts:profile' report.reporter.username %}" class="text-decoration-none">
+                                {{ report.reporter.username }}
+                            </a>
+                        </td>
+                        <td>{{ report.get_content_type_display_ar }}</td>
+                        <td class="text-truncate" style="max-width: 200px;">
+                            {{ report.get_reported_content_preview }}
+                        </td>
+                        <td>
+                            <span class="badge bg-warning text-dark">
+                                {{ report.get_reason_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if report.status == 'pending' %}
+                            <span class="badge bg-warning">{{ report.get_status_display }}</span>
+                            {% elif report.status == 'approved' %}
+                            <span class="badge bg-success">{{ report.get_status_display }}</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ report.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ report.created_at|date:"Y/m/d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'admin_panel:report_detail' report.pk %}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-inbox fs-1 text-muted"></i>
+    <p class="text-muted mt-3">لا توجد بلاغات في هذه الفئة</p>
+</div>
+{% endif %}
+{% endblock %}

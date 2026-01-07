@@ -1,0 +1,23 @@
+<div class="d-flex gap-3">
+    <button type="button"
+            class="reaction-btn {% if user_reaction == 'like' %}active-like{% endif %}"
+            hx-post="{% url 'posts:react' post.pk %}"
+            hx-vals='{"type": "like"}'
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            hx-target="#reaction-buttons"
+            hx-swap="innerHTML">
+        <i class="bi bi-hand-thumbs-up{% if user_reaction == 'like' %}-fill{% endif %} me-1"></i>
+        <span>{{ post.likes_count }}</span>
+    </button>
+
+    <button type="button"
+            class="reaction-btn {% if user_reaction == 'dislike' %}active-dislike{% endif %}"
+            hx-post="{% url 'posts:react' post.pk %}"
+            hx-vals='{"type": "dislike"}'
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            hx-target="#reaction-buttons"
+            hx-swap="innerHTML">
+        <i class="bi bi-hand-thumbs-down{% if user_reaction == 'dislike' %}-fill{% endif %} me-1"></i>
+        <span>{{ post.dislikes_count }}</span>
+    </button>
+</div>

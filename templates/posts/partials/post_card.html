@@ -1,0 +1,67 @@
+<div class="card study-card position-relative">
+    <div class="card-body">
+        <!-- Tags -->
+        <div class="mb-2">
+            {% for tag in post.tags.all %}
+            <span class="tag-badge" style="background-color: {{ tag.color }}; font-size: 0.75rem;">
+                {{ tag.name }}
+            </span>
+            {% endfor %}
+        </div>
+
+        <!-- Title -->
+        <h5 class="card-title mb-2">
+            <a href="{% url 'posts:detail' post.pk %}" class="text-decoration-none text-dark stretched-link">
+                {{ post.title }}
+            </a>
+        </h5>
+
+        <!-- Author & Date -->
+        <div class="d-flex align-items-center gap-2 mb-2 text-muted small position-relative" style="z-index: 2;">
+            <a href="{% url 'accounts:profile' post.author.username %}" class="text-decoration-none">
+                <i class="bi bi-person-circle me-1"></i>
+                {{ post.author.username }}
+            </a>
+            <span>•</span>
+            <span>{{ post.created_at|date:"Y/m/d" }}</span>
+        </div>
+
+        <!-- Caption Preview -->
+        {% if post.caption %}
+        <p class="text-muted small mb-2">{{ post.caption|truncatechars:100 }}</p>
+        {% endif %}
+
+        <!-- Study Set Info -->
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                {% if post.study_set.set_type == 'flashcards' %}
+                <span class="badge bg-primary">
+                    <i class="bi bi-stack me-1"></i>
+                    {{ post.study_set.item_count }} بطاقة
+                </span>
+                {% else %}
+                <span class="badge bg-success">
+                    <i class="bi bi-question-circle me-1"></i>
+                    {{ post.study_set.item_count }} سؤال
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Quick Reactions Display -->
+            <div class="d-flex gap-2 text-muted small">
+                <span>
+                    <i class="bi bi-hand-thumbs-up me-1"></i>
+                    {{ post.likes_count }}
+                </span>
+                <span>
+                    <i class="bi bi-hand-thumbs-down me-1"></i>
+                    {{ post.dislikes_count }}
+                </span>
+                <span>
+                    <i class="bi bi-chat me-1"></i>
+                    {{ post.comments.count }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

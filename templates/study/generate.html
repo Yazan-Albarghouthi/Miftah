@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if set_type == 'flashcards' %}إنشاء بطاقات{% else %}إنشاء اختبار{% endif %} - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {% if set_type == 'flashcards' %}
+                        <i class="bi bi-stack me-2"></i>
+                        إنشاء بطاقات تعليمية
+                        {% else %}
+                        <i class="bi bi-question-circle me-2"></i>
+                        إنشاء اختبار
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="generate-form">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <input type="hidden" name="set_type" value="{{ set_type }}">
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.title.label }}</label>
+                            {{ form.title }}
+                        </div>
+
+                        <!-- Input Type Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.input_type.label }}</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="input_type"
+                                           id="input_text" value="text" checked
+                                           onchange="toggleInputType('text')">
+                                    <label class="form-check-label" for="input_text">
+                                        <i class="bi bi-file-text me-1"></i>
+                                        نص
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="input_type"
+                                           id="input_pdf" value="pdf"
+                                           onchange="toggleInputType('pdf')">
+                                    <label class="form-check-label" for="input_pdf">
+                                        <i class="bi bi-file-pdf me-1"></i>
+                                        ملف PDF
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div class="mb-3" id="text-input-section">
+                            <label class="form-label">{{ form.text_content.label }}</label>
+                            {{ form.text_content }}
+                            <div class="form-text">أدخل النص الذي تريد إنشاء المحتوى منه (50 حرف على الأقل)</div>
+                            {% if form.text_content.errors %}
+                            <div class="text-danger small">{{ form.text_content.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- PDF Input -->
+                        <div class="mb-3 d-none" id="pdf-input-section">
+                            <label class="form-label">{{ form.pdf_file.label }}</label>
+                            {{ form.pdf_file }}
+                            <div class="form-text">ارفع ملف PDF (الحد الأقصى 10 ميجابايت)</div>
+                            {% if form.pdf_file.errors %}
+                            <div class="text-danger small">{{ form.pdf_file.errors.0 }}</div>
+                            {% endif %}
+
+                            <!-- PDF Warnings -->
+                            <div class="alert alert-warning mt-2 py-2">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                                    <div>
+                                        <strong>تنبيهات مهمة:</strong>
+                                        <ul class="mb-0 mt-1 small">
+                                            <li><strong>ملفات PDF الممسوحة ضوئياً (OCR):</strong> لا يمكن استخراج النص من الملفات التي تحتوي على صور فقط. تأكد أن ملفك يحتوي على نص قابل للنسخ.</li>
+                                            <li><strong>الملفات الكبيرة:</strong> قد تستغرق معالجة الملفات الكبيرة وقتاً أطول.</li>
+                                            <li><strong>للتحقق:</strong> افتح الملف وحاول تحديد ونسخ النص. إذا لم تستطع، فالملف ممسوح ضوئياً ولن يعمل.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Count -->
+                        <div class="mb-4">
+                            <label class="form-label">{{ form.count.label }}</label>
+                            <div class="d-flex align-items-center gap-2">
+                                {{ form.count }}
+                                <span class="text-muted">
+                                    {% if set_type == 'flashcards' %}بطاقة{% else %}سؤال{% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
+                            <i class="bi bi-magic me-2"></i>
+                            إنشاء باستخدام الذكاء الاصطناعي
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function toggleInputType(type) {
+        const textSection = document.getElementById('text-input-section');
+        const pdfSection = document.getElementById('pdf-input-section');
+
+        if (type === 'text') {
+            textSection.classList.remove('d-none');
+            pdfSection.classList.add('d-none');
+        } else {
+            textSection.classList.add('d-none');
+            pdfSection.classList.remove('d-none');
+        }
+    }
+
+    // PDF file size validation
+    const pdfInput = document.querySelector('input[type="file"]');
+    if (pdfInput) {
+        pdfInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const sizeMB = file.size / (1024 * 1024);
+                const sizeAlert = document.getElementById('file-size-alert');
+
+                // Remove existing alert if any
+                if (sizeAlert) sizeAlert.remove();
+
+                if (sizeMB > 10) {
+                    // File too large - show error
+                    const alert = document.createElement('div');
+                    alert.id = 'file-size-alert';
+                    alert.className = 'alert alert-danger mt-2 py-2 small';
+                    alert.innerHTML = '<i class="bi bi-x-circle me-1"></i> حجم الملف (' + sizeMB.toFixed(1) + ' ميجابايت) يتجاوز الحد الأقصى (10 ميجابايت). يرجى اختيار ملف أصغر.';
+                    this.parentNode.insertBefore(alert, this.nextSibling);
+                    this.value = ''; // Clear the file
+                } else if (sizeMB > 5) {
+                    // Large file - show warning
+                    const alert = document.createElement('div');
+                    alert.id = 'file-size-alert';
+                    alert.className = 'alert alert-info mt-2 py-2 small';
+                    alert.innerHTML = '<i class="bi bi-info-circle me-1"></i> حجم الملف ' + sizeMB.toFixed(1) + ' ميجابايت. قد تستغرق المعالجة بعض الوقت.';
+                    this.parentNode.insertBefore(alert, this.nextSibling);
+                }
+            }
+        });
+    }
+
+    // Show loading state on submit
+    document.getElementById('generate-form').addEventListener('submit', function() {
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> جاري الإنشاء...';
+    });
+</script>
+{% endblock %}
+{% endblock %}

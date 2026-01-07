@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}نشر جديد - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        نشر جديد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if not study_sets %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        لا توجد لديك مجموعات دراسية. يجب إنشاء مجموعة أولاً.
+                        <div class="mt-2">
+                            <a href="{% url 'study:generate' 'flashcards' %}" class="btn btn-primary btn-sm">
+                                إنشاء بطاقات
+                            </a>
+                            <a href="{% url 'study:generate' 'quiz' %}" class="btn btn-outline-primary btn-sm">
+                                إنشاء اختبار
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Study Set Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-collection me-1"></i>
+                                المجموعة الدراسية (مطلوب)
+                            </label>
+                            <select name="study_set" class="form-select" required>
+                                <option value="">اختر مجموعة...</option>
+                                {% for ss in study_sets %}
+                                <option value="{{ ss.pk }}"
+                                        {% if preselected_study_set.pk == ss.pk %}selected{% endif %}>
+                                    {% if ss.set_type == 'flashcards' %}📚{% else %}❓{% endif %}
+                                    {{ ss.title|default:'بدون عنوان' }}
+                                    ({{ ss.item_count }} {% if ss.set_type == 'flashcards' %}بطاقة{% else %}سؤال{% endif %})
+                                    - {{ ss.created_at|date:"Y/m/d" }}
+                                    {% if ss.is_shared %}(مُشارك سابقاً){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.title.label }} (مطلوب)</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="text-danger small">{{ form.title.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tags Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-tags me-1"></i>
+                                التصنيفات (مطلوب)
+                            </label>
+                            <div class="form-text mb-2">اختر من 1 إلى 4 تصنيفات</div>
+
+                            <!-- Selected Tags Display -->
+                            <div id="selected-tags" class="d-flex flex-wrap gap-2 mb-2">
+                                <!-- Selected tags will appear here -->
+                            </div>
+
+                            <!-- Search Input -->
+                            <input type="text" id="tag-search" class="form-control mb-2"
+                                   placeholder="ابحث عن تصنيف...">
+
+                            <!-- Tags Grid -->
+                            <div id="tags-container" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% for tag in all_tags %}
+                                <div class="tag-item d-inline-block m-1"
+                                     data-tag-name="{{ tag.name|lower }}"
+                                     data-tag-color="{{ tag.color }}">
+                                    <input type="checkbox"
+                                           name="tags"
+                                           value="{{ tag.pk }}"
+                                           id="tag-{{ tag.pk }}"
+                                           class="d-none tag-checkbox">
+                                    <label for="tag-{{ tag.pk }}"
+                                           class="tag-chip badge rounded-pill px-3 py-2"
+                                           style="cursor: pointer; font-size: 0.9rem; background-color: #e9ecef; color: #495057;">
+                                        {{ tag.name }}
+                                    </label>
+                                </div>
+                                {% empty %}
+                                <p class="text-muted mb-0">لا توجد تصنيفات. قم بتشغيل: python manage.py seed_tags</p>
+                                {% endfor %}
+                            </div>
+
+                            {% if form.tags.errors %}
+                            <div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Caption -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.caption.label }}</label>
+                            {{ form.caption }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-1"></i>
+                            نشر
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('tag-search');
+    const tagsContainer = document.getElementById('tags-container');
+    const selectedTagsContainer = document.getElementById('selected-tags');
+    const maxTags = 4;
+
+    if (!searchInput || !tagsContainer) return;
+
+    // Store original tag items for reordering
+    const allTagItems = Array.from(tagsContainer.querySelectorAll('.tag-item'));
+
+    // Prevent Enter key from submitting form in search input
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    });
+
+    // Search functionality - sorts and filters tags
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+
+        if (query === '') {
+            // No search query - show all tags in original order
+            allTagItems.forEach(item => {
+                item.style.display = 'inline-block';
+                tagsContainer.appendChild(item);
+            });
+            return;
+        }
+
+        // Score each tag based on match quality
+        const scoredTags = allTagItems.map(item => {
+            const tagName = item.dataset.tagName;
+            let score = 0;
+
+            if (tagName === query) {
+                score = 100; // Exact match
+            } else if (tagName.startsWith(query)) {
+                score = 75;  // Starts with query
+            } else if (tagName.includes(query)) {
+                score = 50;  // Contains query
+            } else {
+                score = 0;   // No match
+            }
+
+            return { item, score, tagName };
+        });
+
+        // Sort by score (highest first), then alphabetically
+        scoredTags.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.tagName.localeCompare(b.tagName, 'ar');
+        });
+
+        // Reorder DOM and show/hide
+        scoredTags.forEach(({ item, score }) => {
+            if (score > 0) {
+                item.style.display = 'inline-block';
+            } else {
+                item.style.display = 'none';
+            }
+            tagsContainer.appendChild(item); // Move to end (in sorted order)
+        });
+    });
+
+    // Get color from tag item's data attribute
+    function getTagColor(checkbox) {
+        const tagItem = checkbox.closest('.tag-item');
+        return tagItem ? tagItem.dataset.tagColor : '#94a3b8';
+    }
+
+    // Handle tag selection
+    function updateTagStyles() {
+        const checkboxes = document.querySelectorAll('.tag-checkbox');
+        let selectedCount = 0;
+
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            const color = getTagColor(cb);
+
+            if (cb.checked) {
+                selectedCount++;
+                label.style.backgroundColor = color;
+                label.style.color = '#ffffff';
+            } else {
+                label.style.backgroundColor = '#e9ecef';
+                label.style.color = '#495057';
+            }
+        });
+
+        // Disable unchecked tags if max reached
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            if (!cb.checked && selectedCount >= maxTags) {
+                label.style.opacity = '0.5';
+                label.style.pointerEvents = 'none';
+            } else {
+                label.style.opacity = '1';
+                label.style.pointerEvents = 'auto';
+            }
+        });
+
+        updateSelectedTagsDisplay();
+    }
+
+    // Display selected tags at the top
+    function updateSelectedTagsDisplay() {
+        selectedTagsContainer.innerHTML = '';
+        const checkboxes = document.querySelectorAll('.tag-checkbox:checked');
+
+        checkboxes.forEach(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            const tagName = label.textContent.trim();
+            const color = getTagColor(cb);
+
+            const chip = document.createElement('span');
+            chip.className = 'badge rounded-pill px-3 py-2 d-flex align-items-center gap-1';
+            chip.style.backgroundColor = color;
+            chip.style.color = '#ffffff';
+            chip.style.fontSize = '0.9rem';
+            chip.innerHTML = `
+                ${tagName}
+                <i class="bi bi-x-circle" style="cursor: pointer;" data-tag-id="${cb.id}"></i>
+            `;
+
+            // Remove tag on X click
+            chip.querySelector('i').addEventListener('click', function() {
+                document.getElementById(this.dataset.tagId).checked = false;
+                updateTagStyles();
+            });
+
+            selectedTagsContainer.appendChild(chip);
+        });
+    }
+
+    // Listen for checkbox changes
+    document.querySelectorAll('.tag-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateTagStyles);
+    });
+
+    // Initialize on page load
+    updateTagStyles();
+});
+</script>
+{% endblock %}

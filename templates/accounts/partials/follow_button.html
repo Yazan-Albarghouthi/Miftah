@@ -1,0 +1,28 @@
+{% if is_following %}
+<button type="button" class="btn btn-secondary"
+        hx-post="{% url 'accounts:toggle_follow' profile_user.username %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-target="#follow-button"
+        hx-swap="innerHTML">
+    <i class="bi bi-check-lg me-1"></i>
+    متابَع
+</button>
+{% elif follows_me %}
+<button type="button" class="btn btn-primary"
+        hx-post="{% url 'accounts:toggle_follow' profile_user.username %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-target="#follow-button"
+        hx-swap="innerHTML">
+    <i class="bi bi-person-plus me-1"></i>
+    متابعة متبادلة
+</button>
+{% else %}
+<button type="button" class="btn btn-primary"
+        hx-post="{% url 'accounts:toggle_follow' profile_user.username %}"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        hx-target="#follow-button"
+        hx-swap="innerHTML">
+    <i class="bi bi-person-plus me-1"></i>
+    متابعة
+</button>
+{% endif %}

@@ -1,0 +1,207 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}بلاغ #{{ report.pk }} - لوحة الإدارة{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{% url 'admin_panel:reports_list' %}" class="text-decoration-none text-muted">
+            <i class="bi bi-arrow-right me-1"></i>
+            العودة للبلاغات
+        </a>
+        <h4 class="mb-0 mt-2">
+            <i class="bi bi-flag me-2"></i>
+            بلاغ #{{ report.pk }}
+        </h4>
+    </div>
+    <div>
+        {% if report.status == 'pending' %}
+        <span class="badge bg-warning fs-6">{{ report.get_status_display }}</span>
+        {% elif report.status == 'approved' %}
+        <span class="badge bg-success fs-6">{{ report.get_status_display }}</span>
+        {% else %}
+        <span class="badge bg-secondary fs-6">{{ report.get_status_display }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Report Details -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">تفاصيل البلاغ</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">المُبلِّغ</label>
+                        <p class="mb-0">
+                            <a href="{% url 'accounts:profile' report.reporter.username %}" class="text-decoration-none">
+                                <i class="bi bi-person-circle me-1"></i>
+                                {{ report.reporter.username }}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">تاريخ البلاغ</label>
+                        <p class="mb-0">{{ report.created_at|date:"Y/m/d H:i" }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">نوع المحتوى</label>
+                        <p class="mb-0">{{ report.get_content_type_display_ar }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">سبب البلاغ</label>
+                        <p class="mb-0">
+                            <span class="badge bg-warning text-dark">
+                                {{ report.get_reason_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                {% if report.details %}
+                <div class="mb-3">
+                    <label class="text-muted small">تفاصيل إضافية</label>
+                    <p class="mb-0 bg-light p-3 rounded">{{ report.details }}</p>
+                </div>
+                {% endif %}
+
+                {% if report.reviewed_by %}
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="text-muted small">تمت المراجعة بواسطة</label>
+                        <p class="mb-0">{{ report.reviewed_by.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">تاريخ المراجعة</label>
+                        <p class="mb-0">{{ report.reviewed_at|date:"Y/m/d H:i" }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reported Content -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-file-text me-2"></i>
+                    المحتوى المُبلَّغ عنه
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if report.content_object %}
+                    {% if report.content_type.model == 'post' %}
+                    <div class="mb-3">
+                        <label class="text-muted small">العنوان</label>
+                        <p class="mb-0 fw-bold">{{ report.content_object.title }}</p>
+                    </div>
+                    {% if report.content_object.caption %}
+                    <div class="mb-3">
+                        <label class="text-muted small">الوصف</label>
+                        <p class="mb-0">{{ report.content_object.caption }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="text-muted small">الكاتب</label>
+                        <p class="mb-0">
+                            <a href="{% url 'accounts:profile' report.content_object.author.username %}" class="text-decoration-none">
+                                {{ report.content_object.author.username }}
+                            </a>
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'posts:detail' report.content_object.pk %}"
+                           class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-box-arrow-up-left me-1"></i>
+                            عرض المنشور
+                        </a>
+                    </div>
+                    {% elif report.content_type.model == 'comment' %}
+                    <div class="mb-3">
+                        <label class="text-muted small">محتوى التعليق</label>
+                        <p class="mb-0 bg-light p-3 rounded">{{ report.content_object.body }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small">الكاتب</label>
+                        <p class="mb-0">
+                            <a href="{% url 'accounts:profile' report.content_object.author.username %}" class="text-decoration-none">
+                                {{ report.content_object.author.username }}
+                            </a>
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'posts:detail' report.content_object.post.pk %}"
+                           class="btn btn-outline-primary btn-sm" target="_blank">
+                            <i class="bi bi-box-arrow-up-left me-1"></i>
+                            عرض المنشور
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-trash fs-1 text-muted"></i>
+                    <p class="text-muted mt-2">تم حذف هذا المحتوى</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Sidebar -->
+    <div class="col-lg-4">
+        {% if report.status == 'pending' %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">
+                    <i class="bi bi-lightning me-2"></i>
+                    الإجراءات
+                </h6>
+            </div>
+            <div class="card-body">
+                <div id="action-result"></div>
+
+                <form method="post" action="{% url 'admin_panel:approve_report' report.pk %}"
+                      class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger w-100"
+                            onclick="return confirm('هل أنت متأكد من قبول البلاغ وحذف المحتوى؟')">
+                        <i class="bi bi-check-circle me-2"></i>
+                        قبول البلاغ وحذف المحتوى
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'admin_panel:dismiss_report' report.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary w-100"
+                            onclick="return confirm('هل أنت متأكد من رفض هذا البلاغ؟')">
+                        <i class="bi bi-x-circle me-2"></i>
+                        رفض البلاغ
+                    </button>
+                </form>
+
+                <hr class="my-3">
+
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    قبول البلاغ سيؤدي إلى حذف المحتوى المُبلَّغ عنه نهائياً.
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle fs-1 text-success mb-3"></i>
+                <p class="mb-0">تمت معالجة هذا البلاغ</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

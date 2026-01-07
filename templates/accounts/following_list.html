@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}المتابَعون - مفتاح{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <h4 class="mb-4">
+                <i class="bi bi-people me-2"></i>
+                أنت تتابع
+            </h4>
+
+            {% if following %}
+            <div class="list-group">
+                {% for follow in following %}
+                <a href="{% url 'accounts:profile' follow.following.username %}"
+                   class="list-group-item list-group-item-action d-flex align-items-center gap-3">
+                    <i class="bi bi-person-circle fs-3 text-primary"></i>
+                    <div>
+                        <strong>{{ follow.following.username }}</strong>
+                        {% if follow.following.profile.bio %}
+                        <p class="text-muted small mb-0">{{ follow.following.profile.bio|truncatechars:50 }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p>أنت لا تتابع أحداً حتى الآن</p>
+                <a href="{% url 'feed:recent' %}" class="btn btn-primary">
+                    استكشف المنشورات
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
